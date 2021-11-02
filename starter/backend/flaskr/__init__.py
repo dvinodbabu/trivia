@@ -7,15 +7,8 @@ import random
 from model.models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 5
-  
-def paginate_questions(request, selection):
-    page = request.args.get("page", 1, type=int)
-    start = (page - 1) * QUESTIONS_PER_PAGE
-    end = start + QUESTIONS_PER_PAGE
 
-    questions = [question.format() for question in selection]
-    current_questions = questions[start:end]
-    return current_questions
+
 
 def create_app(test_config=None):
   # create and configure the app
@@ -23,6 +16,16 @@ def create_app(test_config=None):
   setup_db(app)
   cors = CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
+  
+  def paginate_questions(request, selection):
+    page = request.args.get("page", 1, type=int)
+    start = (page - 1) * QUESTIONS_PER_PAGE
+    end = start + QUESTIONS_PER_PAGE
+
+    questions = [question.format() for question in selection]
+    current_questions = questions[start:end]
+    return current_questions
+  
   def formatted_categories():
     formatted_categories = {}
     categories = Category.query.all()
@@ -49,15 +52,14 @@ def create_app(test_config=None):
         "categories": formatted_categories(),
       }
     )
-  @app.route("/questions/", methods=["POST"])
+  @app.route("/questions", methods=["POST"])
   def add_questions():
-    body=request.get_json()
-    question = body.get("question", None)
-    answer=body.get("answer", None)
-    difficulty=body.get("difficulty", None)
-    category=body.get("category", None)
     try:
-      question=Question(question=question,answer=answer,difficulty=difficulty,category=category)
+      body=request.get_json()
+      question=Question(question=body.get("question", None),
+      answer=body.get("answer", None),
+      difficulty=body.get("difficulty", None),
+      category=body.get("category", None))
       question.insert()
       selection = Question.query.order_by(Question.id).all()
       current_questions=paginate_questions(request,selection)
@@ -72,7 +74,7 @@ def create_app(test_config=None):
     except:
       abort(422)
     
-
+  
   @app.route("/questions'/<int:question_id>", methods=["DELETE"])
   def delete_questions(question_id):
      try:
@@ -84,7 +86,7 @@ def create_app(test_config=None):
        current_questions=paginate_questions(request,selection)
        return jsonify(
          {
-           "success" : True,
+            "success" : True,
             "deleted" : question_id,
             "questions" : current_questions,
             "total_questions" : len(Question.query.all())
@@ -92,12 +94,23 @@ def create_app(test_config=None):
        )
      except:
             abort(422)
-     
+   
+  @app.route("/categories/<int:category_id>/questions", methods=["GET"])
+  def get_questions_by_category(category_id):
+    question = Question.query.filter(Question.category==category_id).all()
+    current_questions=paginate_questions(request,question)
+    return jsonify(
+      {
+        'questions':current_questions,
+        'totalQuestions':len(question),
+        'current_category':'History'
+      }
+    )
+
   @app.after_request
   def after_request(response):
    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTION')
-   #response.headers.add('Access-Control-Allow-Origin', '*')
    return response
   '''
   @TODO: 
