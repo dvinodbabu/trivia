@@ -4,7 +4,7 @@
 
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-
+import random
 
 from model.models import setup_db, Question, Category, db
 
@@ -82,7 +82,6 @@ def create_app(test_config=None):
         return jsonify({'categories': formatted_categories()})
 
     # Get list of questions from db - supports pagination
-
     @app.route('/questions', methods=["GET"])
     def questions():
         """
@@ -260,14 +259,18 @@ def create_app(test_config=None):
         else:
             questions = Question.query.filter(
                 Question.category == category).all()
+        available_questions=[]
+        new_question=[]
         for question in questions:
             if question.id not in previous_questions:
-                ask_question = question.format()
-
+                available_questions.append(question)
+        if len(available_questions) == 0:
+            new_question = None
+        else:
+            new_question = random.choice(available_questions).format()            
         return jsonify({
             'success': True,
-            'previousQuestions': previous_questions,
-            'currentQuestion': ask_question.format()}
+            'question': new_question}
         )
 
     @app.after_request
