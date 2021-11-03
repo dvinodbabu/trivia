@@ -4,7 +4,7 @@ import json
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
-from models import setup_db, Question, Category
+from model.models import setup_db, Question, Category
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -14,8 +14,8 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia_test"
-        self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
+        self.database_name = "trivia"
+        self.database_path = "postgres://{}:{}@{}/{}".format('vinod', 'password', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -29,11 +29,17 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
-
+    def test_paginated_questions(self):
+        
+        response = self.client().get('/questions')
+        result = json.loads(response.data)
+        # check status code and message
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(result['success'], True)
+        print(result['total_questions'])
+        # check that total_questions and questions return data
+        self.assertTrue(result['total_questions'])
+        self.assertTrue(result(data['questions']))
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
