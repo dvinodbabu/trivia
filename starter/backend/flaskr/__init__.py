@@ -1,11 +1,10 @@
 
 # Imports
 
-import os
-from flask import Flask, app, request, abort, jsonify, json
-from flask_sqlalchemy import SQLAlchemy
+
+from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-import random
+
 
 from model.models import setup_db, Question, Category, db
 
@@ -64,8 +63,7 @@ def create_app(test_config=None):
     """
     app = Flask(__name__)
     setup_db(app)
-    cors = CORS(app, resources={
-                r"/*": {"origins": "*"}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
 
     # Get list of categories from db
 
@@ -133,13 +131,14 @@ def create_app(test_config=None):
         """
         try:
             body = request.get_json()
-            question = Question(question=body.get("question", None), answer=body.get(
+            question = Question(question=body.get(
+                "question", None), answer=body.get(
                 "answer", None), difficulty=body.get(
                 "difficulty", None), category=body.get("category", None))
             question.insert()
         # selection = Question.query.order_by(Question.id).all()
         # current_questions=paginate_questions(request,selection)
-        except:
+        except Exception:
             abort(422)
 
     # delete a question from db
@@ -173,7 +172,7 @@ def create_app(test_config=None):
                 "questions": current_questions,
                 "total_questions": len(Question.query.all())}
             )
-        except:
+        except Exception:
             abort(422)
 
     # Get list of questions from db by category- supports pagination
