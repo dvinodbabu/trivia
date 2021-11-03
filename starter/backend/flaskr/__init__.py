@@ -1,11 +1,9 @@
 
 # Imports
 
-
+import random
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
-import random
-
 from model.models import setup_db, Question, Category, db
 
 QUESTIONS_PER_PAGE = 5
@@ -47,11 +45,11 @@ def formatted_categories():
       Category: dictionary of formated categories
 
     """
-    formatted_categories = {}
+    formatted_categories_list = {}
     categories = Category.query.all()
     for category in categories:
-        formatted_categories[category.id] = category.type
-    return formatted_categories
+        formatted_categories_list[category.id] = category.type
+    return formatted_categories_list
 
 
 def create_app(test_config=None):
@@ -163,14 +161,6 @@ def create_app(test_config=None):
             if question is None:
                 abort(404)
             question.delete()
-            selection = Question.query.order_by(Question.id).all()
-            current_questions = paginate_questions(request, selection)
-            return jsonify({
-                "success": True,
-                "deleted": question_id,
-                "questions": current_questions,
-                "total_questions": len(Question.query.all())}
-            )
         except Exception:
             abort(422)
 
@@ -267,7 +257,7 @@ def create_app(test_config=None):
         if len(available_questions) == 0:
             new_question = None
         else:
-            new_question = random.choice(available_questions).format()            
+            new_question = random.choice(available_questions).format()
         return jsonify({
             'success': True,
             'question': new_question}
