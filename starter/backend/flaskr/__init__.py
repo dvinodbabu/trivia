@@ -193,17 +193,20 @@ def create_app(test_config=None):
            "current_category":
           }
          """
-        question = Question.query.filter(
-            Question.category == category_id).all()
-        current_questions = paginate_questions(request, question)
-        current_category = db.session.query(Category.type).filter(
-            Category.id == category_id).all()
-        return jsonify({
-            'success': True,
-            'questions': current_questions,
-            'totalQuestions': len(question),
-            'current_category': current_category}
-        )
+        try: 
+            question = Question.query.filter(
+                Question.category == category_id).all()
+            current_questions = paginate_questions(request, question)
+            current_category = db.session.query(Category.type).filter(
+                Category.id == category_id).all()
+            return jsonify({
+                'success': True,
+                'questions': current_questions,
+                'totalQuestions': len(question),
+                'current_category': current_category}
+            )
+        except Exception:
+            abort(422)
 
     # search a question by wild card from list of questions in db
 
@@ -223,18 +226,20 @@ def create_app(test_config=None):
           "current_category":
          }
         """
-        wild_search_question_name = "%{}%".format(
-            request.get_json().get('searchTerm', None))
-        selection = Question.query.filter(
-            Question.question.ilike(wild_search_question_name)).all()
-        current_questions = paginate_questions(request, selection)
-        return jsonify({
-            'success': True,
-            'questions': current_questions,
-            'totalQuestions': len(selection),
-            'current_category': None}
-        )
-
+        try:
+            wild_search_question_name = "%{}%".format(
+                request.get_json().get('searchTerm', None))
+            selection = Question.query.filter(
+                Question.question.ilike(wild_search_question_name)).all()
+            current_questions = paginate_questions(request, selection)
+            return jsonify({
+                'success': True,
+                'questions': current_questions,
+                'totalQuestions': len(selection),
+                'current_category': None}
+            )
+        except Exception:
+            abort(422)
     # start quiz - display random set of questions by category
 
     @app.route("/quizzes", methods=["POST"])
@@ -253,27 +258,30 @@ def create_app(test_config=None):
             "currentQuestion":
            }
          """
-        form = request.get_json()
-        previous_questions = form.get('previous_questions')
-        category = form.get('quiz_category').get('id')
-        if category == 0:
-            questions = Question.query.all()
-        else:
-            questions = Question.query.filter(
-                Question.category == category).all()
-        available_questions=[]
-        new_question=[]
-        for question in questions:
-            if question.id not in previous_questions:
-                available_questions.append(question)
-        if len(available_questions) == 0:
-            new_question = None
-        else:
-            new_question = random.choice(available_questions).format()
-        return jsonify({
-            'success': True,
-            'question': new_question}
-        )
+        try:
+            form = request.get_json()
+            previous_questions = form.get('previous_questions')
+            category = form.get('quiz_category').get('id')
+                if category == 0:
+                    questions = Question.query.all()
+                else:
+                    questions = Question.query.filter(
+                        Question.category == category).all()
+            available_questions=[]
+            new_question=[]
+            for question in questions:
+                if question.id not in previous_questions:
+                    available_questions.append(question)
+            if len(available_questions) == 0:
+                new_question = None
+            else:
+                new_question = random.choice(available_questions).format()
+            return jsonify({
+                'success': True,
+                'question': new_question}
+            )
+        except Exception:
+            abort(422)    
 
     @app.after_request
     def after_request(response):
