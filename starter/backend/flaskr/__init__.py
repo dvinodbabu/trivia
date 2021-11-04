@@ -133,14 +133,19 @@ def create_app(test_config=None):
                 "answer", None), difficulty=body.get(
                 "difficulty", None), category=body.get("category", None))
             question.insert()
-        # selection = Question.query.order_by(Question.id).all()
-        # current_questions=paginate_questions(request,selection)
+            selection = Question.query.order_by(Question.id).all()
+            current_questions=paginate_questions(request,selection)
+            return jsonify({
+                'success' : True,
+                'created' : question.id,
+                'total_questions' : len(Question.query.all())}
+                )
         except Exception:
             abort(422)
 
     # delete a question from db
-    @app.route("/questions'/<int:question_id>", methods=["DELETE"])
-    def delete_questions(question_id):
+    @app.route("/questions/<int:question_id>", methods=["DELETE"])
+    def delete_question(question_id):
         """
         Method used to delete a existing questions from the 'trivia' db.
         HTTP:DELETE
@@ -161,6 +166,11 @@ def create_app(test_config=None):
             if question is None:
                 abort(404)
             question.delete()
+            return jsonify({
+                'success' : True,
+                'deleted' : question.id,
+                'total_questions' : len(Question.query.all())}
+                )
         except Exception:
             abort(422)
 
@@ -189,6 +199,7 @@ def create_app(test_config=None):
         current_category = db.session.query(Category.type).filter(
             Category.id == category_id).all()
         return jsonify({
+            'success': True,
             'questions': current_questions,
             'totalQuestions': len(question),
             'current_category': current_category}
@@ -218,6 +229,7 @@ def create_app(test_config=None):
             Question.question.ilike(wild_search_question_name)).all()
         current_questions = paginate_questions(request, selection)
         return jsonify({
+            'success': True,
             'questions': current_questions,
             'totalQuestions': len(selection),
             'current_category': None}
@@ -280,5 +292,37 @@ def create_app(test_config=None):
         response.headers.add('Access-Control-Allow-Methods',
                              'GET, POST, PATCH, DELETE, OPTION')
         return response
+    
+    @app.errorhandler(500)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 500,
+            "message": "Server Error"
+        }), 500
+        
+    @app.errorhandler(404)
+    def not_found(error):
+        return jsonify({
+            "success": False,
+            "error": 404,
+            "message": "resource not found"
+        }), 404
+
+    @app.errorhandler(422)
+    def unprocessable(error):
+        return jsonify({
+            "success": False,
+            "error": 422,
+            "message": "unprocessable"
+        }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        return jsonify({
+            "success": False,
+            "error": 400,
+            "message": "bad request"
+        }), 400
 
     return app
