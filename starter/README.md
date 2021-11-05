@@ -40,23 +40,24 @@ psql trivia < trivia.psql
 
 
 1. setup a virtual environment
-```bash
+```
 cd ${PROJECT_PATH}\backend
 python3 -m venv dev
 dev\Scripts\activate.bat
 ```
 2. Install the python dependencies
-```bash
+```
 cd ${PROJECT_PATH}\backend
 pip install -r requirements.txt
 ```
 3. Start the server
 The flask development server will start in port 5000 (http://localhost:5000)
-```bash
+```
 cd ${PROJECT_PATH}\backend
 SET FLASK_APP=flaskr
 SET FLASK_ENV=development
 python -m flask run
+(windows users can alternatively you can run the run.bat script in /backend folder)
 ```
 
 ### Frontend
