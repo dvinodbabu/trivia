@@ -15,7 +15,8 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia"
-        self.database_path = "postgres://{}:{}@{}/{}".format('vinod', 'password', 'localhost:5432', self.database_name)
+        self.database_path = "postgres://{}:{}@{}/{}".format(
+            'vinod', 'password', 'localhost:5432', self.database_name)
         setup_db(self.app, self.database_path)
         self.question = {
             'question' : 'What is the capial of Scotland',
@@ -64,14 +65,7 @@ class TriviaTestCase(unittest.TestCase):
         print(current_questions_number, latest_questions_number)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result['success'], True)
-        self.assertEqual(current_questions_number, latest_questions_number-1)      
-
-    def test_delete_question(self):
-        response = self.client().delete('/questions/39')    
-        result = json.loads(response.data)
-        latest_questions_list=Question.query.all()
-        print(len(latest_questions_list))
-        self.assertEqual(result['success'], True)
+        self.assertEqual(current_questions_number, latest_questions_number-1)
 
     def test_select_questions_by_category(self):
         response = self.client().get('/categories/2/questions')
@@ -85,8 +79,33 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(result['success'], True)
         self.assertEqual(result['totalQuestions'],1)
-
         
+    def test_play_quiz(self):
+        self.request={
+        'previous_questions': [1, 2],
+        'quiz_category':
+            {
+                'type': 'Science', 
+                'id': '1'
+            }
+        }
+        response = self.client().post('/quizzes', json=self.request)
+        result = json.loads(response.data)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(result['success'], True)
+        
+    def test_404_response_code(self):
+        response = self.client().get('/question')
+        result = json.loads(response.data)
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(result['success'], False)
+        
+    def test_422_delete_question(self):
+        response = self.client().delete('/questions/400')    
+        result = json.loads(response.data)
+        print(response.status_code)
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(result['success'], False)
         
 # Make the tests conveniently executable
 if __name__ == "__main__":

@@ -6,7 +6,7 @@ from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
 from model.models import setup_db, Question, Category, db
 
-QUESTIONS_PER_PAGE = 5
+QUESTIONS_PER_PAGE = 10
 
 
 # paginate questions set QUESTIONS_PER_PAGE to the desired value
@@ -53,7 +53,8 @@ def formatted_categories():
 
 
 def create_app(test_config=None):
-    """ create app method, sets the db and CORS related configuration
+    """ 
+    create app method, sets the db and CORS related configuration
     Args:
 
     Returns:
@@ -98,17 +99,20 @@ def create_app(test_config=None):
           "categories":
           }
         """
-        selection = Question.query.order_by(Question.id).all()
-        current_questions = paginate_questions(request, selection)
-        if len(current_questions) == 0:
-            abort(404)
-        return jsonify({
-            "success": True,
-            "questions": current_questions,
-            "total_questions": len(Question.query.all()),
-            "current_category": None,
-            "categories": formatted_categories(), }
-        )
+        try:
+            selection = Question.query.order_by(Question.id).all()
+            current_questions = paginate_questions(request, selection)
+            if len(current_questions) == 0:
+                abort(404)
+            return jsonify({
+                'success': True,
+                'questions': current_questions,
+                'total_questions': len(Question.query.all()),
+                'current_category': None,
+                'categories': formatted_categories(), }
+            )
+        except Exception:
+            abort(422)
 
     # Add a new question in db
 
@@ -194,15 +198,15 @@ def create_app(test_config=None):
           }
          """
         try: 
-            question = Question.query.filter(
+            selection = Question.query.filter(
                 Question.category == category_id).all()
-            current_questions = paginate_questions(request, question)
+            current_questions = paginate_questions(request, selection)
             current_category = db.session.query(Category.type).filter(
                 Category.id == category_id).all()
             return jsonify({
                 'success': True,
                 'questions': current_questions,
-                'totalQuestions': len(question),
+                'total_questions': len(selection),
                 'current_category': current_category}
             )
         except Exception:
@@ -262,11 +266,11 @@ def create_app(test_config=None):
             form = request.get_json()
             previous_questions = form.get('previous_questions')
             category = form.get('quiz_category').get('id')
-                if category == 0:
-                    questions = Question.query.all()
-                else:
-                    questions = Question.query.filter(
-                        Question.category == category).all()
+            if category == 0:
+                questions = Question.query.all()
+            else:
+                questions = Question.query.filter(
+                    Question.category == category).all()
             available_questions=[]
             new_question=[]
             for question in questions:
