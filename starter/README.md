@@ -78,6 +78,23 @@ npm start
 * Base URL: The backend is hosted at `http://localhost:5000/`
 * Authentication: None
 
+### Error Handling
+
+Errors are returned in the below JSON format:
+```
+    {
+        "success": False,
+        "error": 404,
+        "message": "resource not found"
+    }
+```
+The API will return the following types of errors:
+
+* 500 - Server Error
+* 400 – bad request
+* 404 – resource not found
+* 422 – unprocessable
+
 ## API end-points
 
 #### GET /categories
@@ -233,5 +250,45 @@ npm start
     "deleted": 40,
     "success": true,
     "total_questions": 41
+}
+```
+#### POST /questions/query
+* Definition: Searches question(s) based on a search term 
+* Sample: `curl -X POST -d "{\"searchTerm\": \"Tom\"}" -H "Content-Type: application/json" http://localhost:5000/questions/query`<br>
+* Response:
+```
+{
+    "current_category": null,
+    "questions": [
+        {
+            "answer": "Apollo 13",
+            "category": 5,
+            "difficulty": 4,
+            "id": 2,
+            "question": "What movie earned Tom Hanks his third straight Oscar nomination, in 1996?"
+        }
+    ],
+    "success": true,
+    "totalQuestions": 1
+}
+```
+#### POST /quizzes
+* Definition: Starts the quiz game. Displays questions based on the user selected 
+category randomly. This is api also keeps track of the questions already asked.
+* Response:
+```
+{
+        'success': True,
+        'question': new_question
+}
+```
+#### POST /questions
+* Definition: Adds a new question to the questions database.
+* Response:
+```
+{
+       'success' : True,
+       'created' : new_question id
+       'total_questions' : total number of questions
 }
 ```
