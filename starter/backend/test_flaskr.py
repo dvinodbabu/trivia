@@ -15,8 +15,11 @@ class TriviaTestCase(unittest.TestCase):
         self.app = create_app()
         self.client = self.app.test_client
         self.database_name = "trivia"
-        self.database_path = "postgres://{}:{}@{}/{}".format(
-            'vinod', 'password', 'localhost:5432', self.database_name)
+        self.DB_USER = os.getenv('DB_USER', 'vinod')  
+        self.DB_PASSWORD = os.getenv('DB_PASSWORD', 'password')
+        self.DB_HOST = os.getenv('DB_HOST', 'localhost:5432') 
+        self.database_path = "postgres://{}:{}@{}/{}".format(self.DB_USER, 
+            self.DB_PASSWORD, self.DB_HOST, self.database_name)
         setup_db(self.app, self.database_path)
         self.question = {
             'question' : 'What is the capial of Scotland',

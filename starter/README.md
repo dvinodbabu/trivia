@@ -56,8 +56,11 @@ The flask development server will start in port 5000 (http://localhost:5000)
 cd ${PROJECT_PATH}\backend
 SET FLASK_APP=flaskr
 SET FLASK_ENV=development
+set DB_USER=postgres
+set DB_PASSWORD=password
+set DB_HOST=localhost:5432
 python -m flask run
-(windows users can alternatively you can run the run.bat script in /backend folder)
+(windows users can alternatively can run the run.bat script in /backend folder)
 ```
 
 ### Frontend
